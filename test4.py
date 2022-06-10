@@ -1,8 +1,10 @@
 from functions import *
 from openpyxl import load_workbook
 
-wb = load_workbook(r"homework1-1 (answers).xlsx")
-student_file = r"Copy homework1-1 (answers).xlsx"
+
+student_file = r"homework1-1.xlsx"
+wb = openpyxl.load_workbook(student_file)
+delete_excel_table_formating(wb, "sum, count")
 lists = "sum, count"
 good = []
 bad = []
@@ -11,7 +13,7 @@ formula_dictionary = dict(G29=4, G30=5, G31=8, G32=6, G33=9, G36=105, G37=164, G
 
 for key, value in formula_dictionary.items():
 
-    formula = cell_string(student_file, lists, key)
+    formula = cell_string(wb, lists, key)
 
     if is_formula(formula):
         print(formula)
@@ -26,8 +28,11 @@ for key, value in formula_dictionary.items():
 
 
 for i in good:
-    cell_change_colour(student_file, lists, i, "33FF33")
+    cell_change_colour(wb, lists, i, "33FF33")
 
 
-for i in good:
-    cell_change_colour(student_file, lists, i, "33FF33")
+for i in bad:
+    cell_change_colour(wb, lists, i, "FF6666")
+
+wb.save(student_file)
+wb.close()
