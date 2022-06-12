@@ -1,3 +1,5 @@
+import os
+
 import openpyxl
 from openpyxl.styles import PatternFill
 import numpy as np
@@ -56,3 +58,10 @@ def delete_excel_cell_formating(wb, sheet_name, cell_name):
 def unique(list1):
     x = np.array(list1)
     return np.unique(x)
+
+def read_files_from_folder(folder_path):
+    files = []
+    for file in os.listdir(folder_path):
+        if file.endswith(".xlsx"):
+            files.append(file)
+    return files

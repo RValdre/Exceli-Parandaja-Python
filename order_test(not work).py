@@ -1,7 +1,6 @@
 from functions import *
 import random
 
-
 student_file = r"homework1-1 (answers).xlsx"
 wb = openpyxl.load_workbook(student_file)
 lists = "Validation"
