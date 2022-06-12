@@ -1,2 +1,0 @@
-# Exceli-Parandaja-Python
-SOS

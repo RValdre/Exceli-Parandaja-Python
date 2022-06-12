@@ -1,6 +1,6 @@
 import openpyxl
-import pandas
 from openpyxl.styles import PatternFill
+import numpy as np
 
 
 
@@ -28,13 +28,11 @@ def cell_change_colour(wb, sheet_name, cell_name, colour):
 
 
 
-def cell_write(file_path, sheet_name, cell_name, value):
+def cell_write(wb, sheet_name, cell_name, value):
 
-    wb = openpyxl.load_workbook(file_path)
     sheet = wb[sheet_name]
     cell = sheet[cell_name]
     cell.value = value
-    wb.save(file_path)
 
 
 def cell_answer(file_path, sheet_name, cell_name):
@@ -54,3 +52,7 @@ def delete_excel_cell_formating(wb, sheet_name, cell_name):
     sheet = wb[sheet_name]
     cell = sheet[cell_name]
     cell.style = 'Normal'
+
+def unique(list1):
+    x = np.array(list1)
+    return np.unique(x)
