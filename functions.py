@@ -1,8 +1,5 @@
 import openpyxl
 import pandas
-import pandas as pd
-import xlrd
-import xlutils
 from openpyxl.styles import PatternFill
 
 
@@ -24,9 +21,6 @@ def cell_adress_to_row_col(cell_adress):
     return int(cell_adress[1:])-2, ord(cell_adress[0]) - ord('A')
 
 def cell_change_colour(wb, sheet_name, cell_name, colour):
-    """
-    Changes the colour of a cell to a different colour
-    """
     sheet = wb[sheet_name]
     cell = sheet[cell_name]
     cell.fill = PatternFill(start_color=colour, end_color=colour, fill_type="solid")
@@ -35,9 +29,7 @@ def cell_change_colour(wb, sheet_name, cell_name, colour):
 
 
 def cell_write(file_path, sheet_name, cell_name, value):
-    """
-    Writes a value to a cell
-    """
+
     wb = openpyxl.load_workbook(file_path)
     sheet = wb[sheet_name]
     cell = sheet[cell_name]
@@ -53,13 +45,12 @@ def cell_answer(file_path, sheet_name, cell_name):
 
 
 def delete_excel_table_formating(wb, sheet_name):
-    """
-    Delete all Excel table formating
-    """
     sheet = wb[sheet_name]
     for row in sheet.iter_rows():
         for cell in row:
             cell.style = 'Normal'
 
-
-
+def delete_excel_cell_formating(wb, sheet_name, cell_name):
+    sheet = wb[sheet_name]
+    cell = sheet[cell_name]
+    cell.style = 'Normal'

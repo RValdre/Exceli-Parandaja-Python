@@ -2,7 +2,7 @@ from functions import *
 from openpyxl import load_workbook
 
 
-student_file = r"homework1-1.xlsx"
+student_file = r"homework1-1 (answers).xlsx"
 wb = openpyxl.load_workbook(student_file)
 delete_excel_table_formating(wb, "sum, count")
 lists = "sum, count"
