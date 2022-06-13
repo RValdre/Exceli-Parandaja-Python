@@ -468,3 +468,143 @@ def logical_functions(student_file, wb):
         if i.find("E") != -1:
             cell_write(wb, lists, i.replace("E", "G"), "Wrong answer")
             cell_change_colour(wb, lists, i.replace("E", "G"), "FDDA0D")
+
+def lookup_functions(student_file, wb):
+    lists = "lookup functions"
+    months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun"]
+
+    good = []
+    bad = []
+
+    not_formula = []
+    formula_error = []
+    wrong_answer = []
+
+    look_up = dict(F6=200, F7=25, F8=150, F9=75, F10=750, F11=75, F12=300, F13=150, F14=25, F15=150, F16=150)
+
+    for key, value in look_up.items():
+        formula = cell_string(wb, lists, key)
+        if is_formula(formula):
+            if formula.find('VLOOKUP') != -1:
+                delete_excel_cell_formating(wb, lists, key)
+                if cell_answer(student_file, lists, key) == value:
+                    good.append(key)
+                else:
+                    bad.append(key)
+                    wrong_answer.append(key)
+            else:
+                bad.append(key)
+                formula_error.append(key)
+        else:
+            bad.append(key)
+            not_formula.append(key)
+
+    jaanuar = dict(Week1=[1, 1, 272], Week2=[1, 2, 112], Week3=[1, 3, 282], Week4=[1, 4, 114])
+    veebruar = dict(Week1=[2, 1, 251], Week2=[2, 2, 363], Week3=[2, 3, 59], Week4=[2, 4, 421])
+    march = dict(Week1=[3, 1, 339], Week2=[3, 2, 162], Week3=[3, 3, 409], Week4=[3, 4, 438])
+    april = dict(Week1=[4, 1, 412], Week2=[4, 2, 269], Week3=[4, 3, 215], Week4=[4, 4, 391])
+    mai = dict(Week1=[5, 1, 16], Week2=[5, 2, 358], Week3=[5, 3, 342], Week4=[5, 4, 110])
+    june = dict(Week1=[6, 1, 137], Week2=[6, 2, 334], Week3=[6, 3, 429], Week4=[6, 4, 181])
+
+    arr = [jaanuar, veebruar, march, april, mai, june]
+    excel_cell_month_value = str(cell_string(wb, lists, "C48"))
+    month = months.index(excel_cell_month_value)
+    week = cell_string(wb, lists, "C49")
+    answers = dict(C51=[arr[month][week][0], "MATCH"], C52=[arr[month][week][1], "MATCH"],
+                   C54=[arr[month][week][2], "INDEX"], C56=[arr[month][week][2], "INDIRECT"],
+                   C58=[arr[month][week][2], "OFFSET"])
+
+    for key, value in answers.items():
+        formula = cell_string(wb, lists, key)
+        if is_formula(formula):
+            if formula.find(value[1]) != -1:
+                delete_excel_cell_formating(wb, lists, key)
+                if cell_answer(student_file, lists, key) == value[0]:
+                    good.append(key)
+                else:
+                    bad.append(key)
+                    wrong_answer.append(key)
+            else:
+                bad.append(key)
+                formula_error.append(key)
+        else:
+            bad.append(key)
+            not_formula.append(key)
+
+    categ = ["OVH (overheads)", "MAT (material)", "OGS (other goods/services)", "SAL (salaries)", "DEP (depreciation)"]
+
+    ovhCategory = ["ovhCategory", 1177]
+    matCategory = ["matCategory", 761]
+    ogsCategory = ["ogsCategory", 1385]
+    salCategory = ["salCategory", 2013]
+    depCategory = ["depCategory", 1003]
+
+    categ2 = [ovhCategory, matCategory, ogsCategory, salCategory, depCategory]
+    value_of = str(cell_string(wb, lists, "D31"))
+    cat = categ.index(value_of)
+
+    formula = cell_string(wb, lists, "D33")
+    formula2 = cell_string(wb, lists, "D35")
+
+    if is_formula(formula) and is_formula(formula2):
+        if formula.find("CONCATENATE") != -1 and formula2.find("SUM") != -1:
+            delete_excel_cell_formating(wb, lists, "D33")
+            delete_excel_cell_formating(wb, lists, "D35")
+            if str(cell_answer(student_file, lists, "D33")) == str(categ2[cat][0]) and str(cell_answer(student_file, lists, "D35")) == str(categ2[cat][1]):
+                good.append("D33")
+                good.append("D35")
+            else:
+                bad.append("D33")
+                bad.append("D35")
+                wrong_answer.append("D33")
+                wrong_answer.append("D35")
+        else:
+            bad.append("D33")
+            bad.append("D35")
+            formula_error.append("D33")
+            formula_error.append("D35")
+    else:
+        bad.append("D33")
+        bad.append("D35")
+        not_formula.append("D33")
+        not_formula.append("D35")
+
+    for i in good:
+        cell_change_colour(wb, lists, i, "33FF33")
+
+    for i in bad:
+        cell_change_colour(wb, lists, i, "FF6666")
+
+    for i in not_formula:
+        if i.find("F") != -1:
+            cell_write(wb, lists, i.replace("F", "E"), "Not a formula")
+            cell_change_colour(wb, lists, i.replace("F", "E"), "FDDA0D")
+        if i.find("C") != -1:
+            cell_write(wb, lists, i.replace("C", "F"), "Not a formula")
+            cell_change_colour(wb, lists, i.replace("C", "F"), "FDDA0D")
+        if i.find("D") != -1:
+            cell_write(wb, lists, i.replace("D", "I"), "Not a formula")
+            cell_change_colour(wb, lists, i.replace("D", "I"), "FDDA0D")
+
+
+    for i in formula_error:
+        if i.find("F") != -1:
+            cell_write(wb, lists, i.replace("F", "E"), "Formula error")
+            cell_change_colour(wb, lists, i.replace("F", "E"), "FDDA0D")
+        if i.find("C") != -1:
+            cell_write(wb, lists, i.replace("C", "F"), "Formula error")
+            cell_change_colour(wb, lists, i.replace("C", "F"), "FDDA0D")
+        if i.find("D") != -1:
+            cell_write(wb, lists, i.replace("D", "I"), "Not a formula")
+            cell_change_colour(wb, lists, i.replace("D", "I"), "FDDA0D")
+
+    for i in wrong_answer:
+        if i.find("F") != -1:
+            cell_write(wb, lists, i.replace("F", "E"), "Wrong answer")
+            cell_change_colour(wb, lists, i.replace("F", "E"), "FDDA0D")
+        if i.find("C") != -1:
+            cell_write(wb, lists, i.replace("C", "F"), "Wrong answer")
+            cell_change_colour(wb, lists, i.replace("C", "F"), "FDDA0D")
+        if i.find("D") != -1:
+            cell_write(wb, lists, i.replace("D", "I"), "Not a formula")
+            cell_change_colour(wb, lists, i.replace("D", "I"), "FDDA0D")
