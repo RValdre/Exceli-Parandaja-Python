@@ -1,7 +1,4 @@
-import openpyxl
-
-from sum_count import sum_count
-from text_functions import text_functions
+from functions import *
 
 student_file = r"homework1-1 (answers).xlsx"
 wb = openpyxl.load_workbook(student_file)
