@@ -1,15 +1,17 @@
 import os
+import shutil
+from zipfile import ZipFile
 
 import openpyxl
 from openpyxl.styles import PatternFill
 import numpy as np
 
 
-
 def cell_string(wb, sheet_name, cell_name):
     sheet = wb[sheet_name]
     cell = sheet[cell_name]
     return cell.value
+
 
 def is_formula(cell_name):
     if str(cell_name) is None:
@@ -19,8 +21,8 @@ def is_formula(cell_name):
 
 
 def cell_adress_to_row_col(cell_adress):
+    return int(cell_adress[1:]) - 2, ord(cell_adress[0]) - ord('A')
 
-    return int(cell_adress[1:])-2, ord(cell_adress[0]) - ord('A')
 
 def cell_change_colour(wb, sheet_name, cell_name, colour):
     sheet = wb[sheet_name]
@@ -28,10 +30,7 @@ def cell_change_colour(wb, sheet_name, cell_name, colour):
     cell.fill = PatternFill(start_color=colour, end_color=colour, fill_type="solid")
 
 
-
-
 def cell_write(wb, sheet_name, cell_name, value):
-
     sheet = wb[sheet_name]
     cell = sheet[cell_name]
     cell.value = value
@@ -50,14 +49,17 @@ def delete_excel_table_formating(wb, sheet_name):
         for cell in row:
             cell.style = 'Normal'
 
+
 def delete_excel_cell_formating(wb, sheet_name, cell_name):
     sheet = wb[sheet_name]
     cell = sheet[cell_name]
     cell.style = 'Normal'
 
+
 def unique(list1):
     x = np.array(list1)
     return np.unique(x)
+
 
 def read_files_from_folder(folder_path):
     files = []
@@ -66,11 +68,13 @@ def read_files_from_folder(folder_path):
             files.append(file)
     return files
 
-def sum_count(student_file,wb):
+
+def sum_count(student_file, wb):
     lists = "sum, count"
 
     good = []
     bad = []
+    empty = []
 
     not_formula = []
     formula_error = []
@@ -78,148 +82,167 @@ def sum_count(student_file,wb):
 
     count_if = dict(G29=4, G30=5, G31=8, G32=6, G33=9, G42=2, G43=2, G44=2, G45=9)
 
-    sum_if = dict (G36=105, G37=164, G38=156, G39=511, G47=25, G48=75, G49=309, G52=386)
-
-
+    sum_if = dict(G36=105, G37=164, G38=156, G39=511, G47=25, G48=75, G49=309, G52=386)
 
     for key, value in count_if.items():
-
         formula = cell_string(wb, lists, key)
-
-        if is_formula(formula):
-           if formula.find('COUNTIF') != -1 or formula.find('COUNTIFS') != -1:
-               delete_excel_cell_formating(wb, lists, key)
-               if cell_answer(student_file, lists, key) == value:
-                   good.append(key)
-               else:
-                   bad.append(key)
-                   wrong_answer.append(key)
-           else:
-               bad.append(key)
-               formula_error.append(key)
-        else:
+        if check_if_cell_empty(cell_answer(student_file, lists, key)):
+            empty.append(key)
             bad.append(key)
-            not_formula.append(key)
-
+            continue
+        else:
+            if is_formula(formula):
+                if formula.find('COUNTIF') != -1 or formula.find('COUNTIFS') != -1:
+                    delete_excel_cell_formating(wb, lists, key)
+                    if cell_answer(student_file, lists, key) == value:
+                        good.append(key)
+                    else:
+                        bad.append(key)
+                        wrong_answer.append(key)
+                else:
+                    bad.append(key)
+                    formula_error.append(key)
+            else:
+                bad.append(key)
+                not_formula.append(key)
 
     for key, value in sum_if.items():
 
         formula = cell_string(wb, lists, key)
-
-        if is_formula(formula):
-           if formula.find('SUMIF') != -1 or formula.find('SUMIFS') != -1:
-               delete_excel_cell_formating(wb, lists, key)
-               if cell_answer(student_file, lists, key) == value:
-                   good.append(key)
-               else:
-                   bad.append(key)
-                   wrong_answer.append(key)
-           else:
-               bad.append(key)
-               formula_error.append(key)
-        else:
+        if check_if_cell_empty(cell_answer(student_file, lists, key)):
+            empty.append(key)
             bad.append(key)
-            not_formula.append(key)
-
+            continue
+        else:
+            if is_formula(formula):
+                if formula.find('SUMIF') != -1 or formula.find('SUMIFS') != -1:
+                    delete_excel_cell_formating(wb, lists, key)
+                    if cell_answer(student_file, lists, key) == value:
+                        good.append(key)
+                    else:
+                        bad.append(key)
+                        wrong_answer.append(key)
+                else:
+                    bad.append(key)
+                    formula_error.append(key)
+            else:
+                bad.append(key)
+                not_formula.append(key)
 
     for i in good:
         cell_change_colour(wb, lists, i.replace("G", "F"), "33FF33")
         cell_change_colour(wb, lists, i, "33FF33")
-
 
     for i in bad:
         cell_change_colour(wb, lists, i.replace("G", "F"), "FF6666")
         cell_change_colour(wb, lists, i, "FF6666")
 
     for i in not_formula:
-        cell_write(wb, lists, i.replace("G", "H"), "Not a formula")
+        cell_write(wb, lists, i.replace("G", "H"), "Not a function")
 
     for i in formula_error:
-        cell_write(wb, lists, i.replace("G", "H"), "Formula error")
+        cell_write(wb, lists, i.replace("G", "H"), "Wrong function used")
 
     for i in wrong_answer:
         cell_write(wb, lists, i.replace("G", "H"), "Wrong answer")
+
+    for i in empty:
+        cell_write(wb, lists, i.replace("G", "H"), "Cell is empty")
+
+
+def check_if_cell_empty(value):
+    if value == None:
+        return True
+    else:
+        return False
+
 
 def text_functions(student_file, wb):
     lists = "text functions"
 
     good = []
     bad = []
+    empty = []
 
     not_formula = []
     wrong_answer = []
     formula_error = []
 
-    fields = dict(B2= "MA", B3 = "CA", B4 = "CA", B5 = "AZ", B6="TX", B10="1BB2", B11 ="1PT", B12="1Z",B13="D",B14="1V24C", B15="1AA",B16="1ZFD3", C10="AC12",C11="AB34",C12="CD8",C13="PO65S3",C14="BV45",C15="DS96S",C16="CD90")
-    if_fields = dict(B26=1300,D30="Pass",D31="Pass",D32="Fail",D33="Pass",D34="Pass",D35="Pass",D36="Fail")
-
-
+    fields = dict(B2="MA", B3="CA", B4="CA", B5="AZ", B6="TX", B10="1BB2", B11="1PT", B12="1Z", B13="D", B14="1V24C",
+                  B15="1AA", B16="1ZFD3", C10="AC12", C11="AB34", C12="CD8", C13="PO65S3", C14="BV45", C15="DS96S",
+                  C16="CD90")
+    if_fields = dict(B26=1300, D30="Pass", D31="Pass", D32="Fail", D33="Pass", D34="Pass", D35="Pass", D36="Fail")
 
     for key, value in fields.items():
 
         formula = cell_string(wb, lists, key)
-
-        if is_formula(formula):
-            delete_excel_cell_formating(wb, lists, key)
-            if str(cell_answer(student_file, lists, key)) == str(value):
-                good.append(key)
-            else:
-                bad.append(key)
-                wrong_answer.append(key)
-        else:
+        if check_if_cell_empty(cell_answer(student_file, lists, key)):
+            empty.append(key)
             bad.append(key)
-            not_formula.append(key)
-
-    for key, value in if_fields.items():
-        formula = cell_string(wb, lists, key)
-
-        if is_formula(formula):
-            if formula.find('IF') != -1 or formula.find('IFS') != -1:
+            continue
+        else:
+            if is_formula(formula):
                 delete_excel_cell_formating(wb, lists, key)
-                if cell_answer(student_file, lists, key) == value:
+                if str(cell_answer(student_file, lists, key)) == str(value):
                     good.append(key)
                 else:
                     bad.append(key)
                     wrong_answer.append(key)
             else:
                 bad.append(key)
-                formula_error.append(key)
-        else:
-            bad.append(key)
-            not_formula.append(key)
+                not_formula.append(key)
 
+    for key, value in if_fields.items():
+        formula = cell_string(wb, lists, key)
+        if check_if_cell_empty(cell_answer(student_file, lists, key)):
+            empty.append(key)
+            bad.append(key)
+            continue
+        else:
+            if is_formula(formula):
+                if formula.find('IF') != -1 or formula.find('IFS') != -1:
+                    delete_excel_cell_formating(wb, lists, key)
+                    if cell_answer(student_file, lists, key) == value:
+                        good.append(key)
+                    else:
+                        bad.append(key)
+                        wrong_answer.append(key)
+                else:
+                    bad.append(key)
+                    formula_error.append(key)
+            else:
+                bad.append(key)
+                not_formula.append(key)
 
     for i in good:
         cell_change_colour(wb, lists, i, "33FF33")
 
-
     for i in bad:
         cell_change_colour(wb, lists, i, "FF6666")
 
-
     for i in not_formula:
         if str(i).find("B") != -1:
-            cell_write(wb, lists, i.replace("B", "E"), "Not a formula")
+            cell_write(wb, lists, i.replace("B", "E"), "Not a function")
             cell_change_colour(wb, lists, i.replace("B", "E"), "FDDA0D")
             cell_change_colour(wb, lists, i.replace("B", "F"), "FDDA0D")
         if str(i).find("C") != -1:
-            cell_write(wb, lists, i.replace("C", "F"), "Not a formula")
+            cell_write(wb, lists, i.replace("C", "F"), "Not a function")
             cell_change_colour(wb, lists, i.replace("C", "F"), "FDDA0D")
         if str(i).find("D") != -1:
-            cell_write(wb, lists, i.replace("D", "G"), "Not a formula")
+            cell_write(wb, lists, i.replace("D", "G"), "Not a function")
             cell_change_colour(wb, lists, i.replace("D", "G"), "FDDA0D")
             cell_change_colour(wb, lists, i.replace("D", "H"), "FDDA0D")
 
     for i in formula_error:
         if str(i).find("B") != -1:
-            cell_write(wb, lists, i.replace("B", "E"), "Formula error")
+            cell_write(wb, lists, i.replace("B", "E"), "Wrong function used")
             cell_change_colour(wb, lists, i.replace("B", "E"), "FDDA0D")
             cell_change_colour(wb, lists, i.replace("B", "F"), "FDDA0D")
         if str(i).find("C") != -1:
-            cell_write(wb, lists, i.replace("C", "F"), "Formula error")
+            cell_write(wb, lists, i.replace("C", "F"), "Wrong function used")
             cell_change_colour(wb, lists, i.replace("C", "F"), "FDDA0D")
         if str(i).find("D") != -1:
-            cell_write(wb, lists, i.replace("D", "G"), "Formula error")
+            cell_write(wb, lists, i.replace("D", "G"), "Wrong function used")
             cell_change_colour(wb, lists, i.replace("D", "G"), "FDDA0D")
             cell_change_colour(wb, lists, i.replace("D", "H"), "FDDA0D")
 
@@ -236,12 +259,26 @@ def text_functions(student_file, wb):
             cell_change_colour(wb, lists, i.replace("D", "G"), "FDDA0D")
             cell_change_colour(wb, lists, i.replace("D", "H"), "FDDA0D")
 
+    for i in empty:
+        if str(i).find("B") != -1:
+            cell_write(wb, lists, i.replace("B", "E"), "Cell is empty")
+            cell_change_colour(wb, lists, i.replace("B", "E"), "FDDA0D")
+            cell_change_colour(wb, lists, i.replace("B", "F"), "FDDA0D")
+        if str(i).find("C") != -1:
+            cell_write(wb, lists, i.replace("C", "F"), "Cell is empty")
+            cell_change_colour(wb, lists, i.replace("C", "F"), "FDDA0D")
+        if str(i).find("D") != -1:
+            cell_write(wb, lists, i.replace("D", "G"), "Cell is empty")
+            cell_change_colour(wb, lists, i.replace("D", "G"), "FDDA0D")
+            cell_change_colour(wb, lists, i.replace("D", "H"), "FDDA0D")
+
 
 def date_functions(student_file, wb):
     lists = "Date functions"
 
     good = []
     bad = []
+    empty = []
 
     not_formula = []
     formula_error = []
@@ -256,86 +293,106 @@ def date_functions(student_file, wb):
     for key, value in dates.items():
 
         formula = cell_string(wb, lists, key)
-
-        if is_formula(formula):
-            if formula.find('DATE') != -1 or formula.find('DATES') != -1:
-                delete_excel_cell_formating(wb, lists, key)
-                if str(cell_answer(student_file, lists, key)) == str(value):
-                    good.append(key)
+        if check_if_cell_empty(cell_answer(student_file, lists, key)):
+            empty.append(key)
+            bad.append(key)
+            continue
+        else:
+            if is_formula(formula):
+                if formula.find('DATE') != -1 or formula.find('DATES') != -1:
+                    delete_excel_cell_formating(wb, lists, key)
+                    if str(cell_answer(student_file, lists, key)) == str(value):
+                        good.append(key)
+                    else:
+                        bad.append(key)
+                        wrong_answer.append(key)
                 else:
                     bad.append(key)
-                    wrong_answer.append(key)
+                    formula_error.append(key)
             else:
                 bad.append(key)
-                formula_error.append(key)
-        else:
-            bad.append(key)
-            not_formula.append(key)
+                not_formula.append(key)
 
     for key, value in week.items():
 
         formula = cell_string(wb, lists, key)
-
-        if is_formula(formula):
-            if formula.find('WEEKDAY') != -1 or formula.find('WEEKDAYS') != -1:
-                delete_excel_cell_formating(wb, lists, key)
-                if cell_answer(student_file, lists, key) == value:
-                    good.append(key)
+        if check_if_cell_empty(cell_answer(student_file, lists, key)):
+            empty.append(key)
+            bad.append(key)
+            continue
+        else:
+            if is_formula(formula):
+                if formula.find('WEEKDAY') != -1 or formula.find('WEEKDAYS') != -1:
+                    delete_excel_cell_formating(wb, lists, key)
+                    if cell_answer(student_file, lists, key) == value:
+                        good.append(key)
+                    else:
+                        bad.append(key)
+                        wrong_answer.append(key)
                 else:
                     bad.append(key)
-                    wrong_answer.append(key)
+                    formula_error.append(key)
             else:
                 bad.append(key)
-                formula_error.append(key)
-        else:
-            bad.append(key)
-            not_formula.append(key)
+                not_formula.append(key)
 
     for key, value in end.items():
 
         formula = cell_string(wb, lists, key)
+        if check_if_cell_empty(cell_answer(student_file, lists, key)):
+            empty.append(key)
+            bad.append(key)
+            continue
+        else:
+            if is_formula(formula):
+                if formula.find('EOMONTH') != -1 or formula.find('EOMONTHS') != -1:
+                    delete_excel_cell_formating(wb, lists, key)
+                    if str(cell_answer(student_file, lists, key)) == str(value):
+                        good.append(key)
+                    else:
+                        bad.append(key)
+                        wrong_answer.append(key)
+                else:
+                    bad.append(key)
+                    formula_error.append(key)
+            else:
+                bad.append(key)
+                not_formula.append(key)
 
-        if is_formula(formula):
-            if formula.find('EOMONTH') != -1 or formula.find('EOMONTHS') != -1:
+    for key, value in func.items():
+
+        formula = cell_string(wb, lists, key)
+        if check_if_cell_empty(cell_answer(student_file, lists, key)):
+            empty.append(key)
+            bad.append(key)
+            continue
+        else:
+            if is_formula(formula):
                 delete_excel_cell_formating(wb, lists, key)
-                if str(cell_answer(student_file, lists, key)) == str(value):
+                if formula.find(value) != -1:
                     good.append(key)
                 else:
                     bad.append(key)
                     wrong_answer.append(key)
             else:
                 bad.append(key)
-                formula_error.append(key)
-        else:
-            bad.append(key)
-            not_formula.append(key)
-
-    for key, value in func.items():
-
-        formula = cell_string(wb, lists, key)
-
-        if is_formula(formula):
-            delete_excel_cell_formating(wb, lists, key)
-            if formula.find(value) != -1:
-                good.append(key)
-            else:
-                bad.append(key)
-                wrong_answer.append(key)
-        else:
-            bad.append(key)
-            not_formula.append(key)
+                not_formula.append(key)
 
     formula_test = cell_string(wb, lists, "E5")
-    if is_formula(formula_test):
-        delete_excel_cell_formating(wb, lists, "E5")
-        if cell_answer(student_file, lists, "E5") == 272:
-            good.append("E5")
+    if check_if_cell_empty(cell_answer(student_file, lists, "E5")):
+        empty.append("E5")
+        bad.append("E5")
+    else:
+        if is_formula(formula_test):
+            delete_excel_cell_formating(wb, lists, "E5")
+            if cell_answer(student_file, lists, "E5") == 272:
+                good.append("E5")
+            else:
+                bad.append("E5")
+                wrong_answer.append("E5")
         else:
             bad.append("E5")
-            wrong_answer.append("E5")
-    else:
-        bad.append("E5")
-        not_formula.append("E5")
+            not_formula.append("E5")
 
     for i in good:
         cell_change_colour(wb, lists, i, "33FF33")
@@ -344,13 +401,13 @@ def date_functions(student_file, wb):
         cell_change_colour(wb, lists, i, "FF6666")
 
     for i in not_formula:
-        vals = str(i[0]) + str(int(i[1:])+7)
-        cell_write(wb, lists, vals, "Not a formula")
+        vals = str(i[0]) + str(int(i[1:]) + 7)
+        cell_write(wb, lists, vals, "Not a function")
         cell_change_colour(wb, lists, vals, "FDDA0D")
 
     for i in formula_error:
-        vals = str(i[0]) + str(int(i[1:])+7)
-        cell_write(wb, lists, vals, "Formula error")
+        vals = str(i[0]) + str(int(i[1:]) + 7)
+        cell_write(wb, lists, vals, "Wrong function used")
         cell_change_colour(wb, lists, vals, "FDDA0D")
 
     for i in wrong_answer:
@@ -358,6 +415,10 @@ def date_functions(student_file, wb):
         cell_write(wb, lists, vals, "Wrong answer")
         cell_change_colour(wb, lists, vals, "FDDA0D")
 
+    for i in empty:
+        vals = str(i[0]) + str(int(i[1:]) + 7)
+        cell_write(wb, lists, vals, "Cell is empty")
+        cell_change_colour(wb, lists, vals, "FDDA0D")
 
 
 def logical_functions(student_file, wb):
@@ -367,6 +428,8 @@ def logical_functions(student_file, wb):
     good_else = []
     bad_if = []
     bad_else = []
+    empty = []
+    empty_else = []
 
     not_formula_if = []
     formula_error_if = []
@@ -382,60 +445,69 @@ def logical_functions(student_file, wb):
 
     for key, value in if_condition.items():
         formula = cell_string(wb, lists, key)
-
-
-        if is_formula(formula):
-            if formula.find('IF') != -1:
-                delete_excel_cell_formating(wb, lists, key)
-                if cell_answer(student_file, lists, key) == value:
-                    good_if.append(key)
+        if check_if_cell_empty(cell_answer(student_file, lists, key)):
+            empty.append(key)
+            bad_if.append(key)
+            continue
+        else:
+            if is_formula(formula):
+                if formula.find('IF') != -1:
+                    delete_excel_cell_formating(wb, lists, key)
+                    if cell_answer(student_file, lists, key) == value:
+                        good_if.append(key)
+                    else:
+                        bad_if.append(key)
+                        wrong_answer_if.append(key)
                 else:
                     bad_if.append(key)
-                    wrong_answer_if.append(key)
+                    formula_error_if.append(key)
             else:
                 bad_if.append(key)
-                formula_error_if.append(key)
-        else:
-            bad_if.append(key)
-            not_formula_if.append(key)
+                not_formula_if.append(key)
 
     for key, value in if_and_condition.items():
         formula = cell_string(wb, lists, key)
-
-
-        if is_formula(formula):
-            if formula.find('IF') != -1 and formula.find('AND') != -1:
-                delete_excel_cell_formating(wb, lists, key)
-                if round(cell_answer(student_file, lists, key)) == value:
-                    good_else.append(key)
+        if check_if_cell_empty(cell_answer(student_file, lists, key)):
+            empty_else.append(key)
+            bad_else.append(key)
+            continue
+        else:
+            if is_formula(formula):
+                if formula.find('IF') != -1 and formula.find('AND') != -1:
+                    delete_excel_cell_formating(wb, lists, key)
+                    if round(cell_answer(student_file, lists, key)) == value:
+                        good_else.append(key)
+                    else:
+                        bad_else.append(key)
+                        wrong_answer_else.append(key)
                 else:
                     bad_else.append(key)
-                    wrong_answer_else.append(key)
+                    formula_error_else.append(key)
             else:
                 bad_else.append(key)
-                formula_error_else.append(key)
-        else:
-            bad_else.append(key)
-            not_formula_else.append(key)
+                not_formula_else.append(key)
 
     for key, value in if_average_condition.items():
         formula = cell_string(wb, lists, key)
-
-
-        if is_formula(formula):
-            if formula.find('IF') != -1 and formula.find('AVERAGE') != -1:
-                delete_excel_cell_formating(wb, lists, key)
-                if cell_answer(student_file, lists, key) == value:
-                    good_else.append(key)
+        if check_if_cell_empty(cell_answer(student_file, lists, key)):
+            empty_else.append(key)
+            bad_else.append(key)
+            continue
+        else:
+            if is_formula(formula):
+                if formula.find('IF') != -1 and formula.find('AVERAGE') != -1:
+                    delete_excel_cell_formating(wb, lists, key)
+                    if cell_answer(student_file, lists, key) == value:
+                        good_else.append(key)
+                    else:
+                        bad_else.append(key)
+                        wrong_answer_else.append(key)
                 else:
                     bad_else.append(key)
-                    wrong_answer_else.append(key)
+                    formula_error_else.append(key)
             else:
                 bad_else.append(key)
-                formula_error_else.append(key)
-        else:
-            bad_else.append(key)
-            not_formula_else.append(key)
+                not_formula_else.append(key)
 
     for i in good_if:
         cell_change_colour(wb, lists, i, "33FF33")
@@ -444,15 +516,19 @@ def logical_functions(student_file, wb):
         cell_change_colour(wb, lists, i, "FF6666")
 
     for i in not_formula_if:
-        cell_write(wb, lists, i.replace("D", "E"), "Not a formula")
+        cell_write(wb, lists, i.replace("D", "E"), "Not a function")
         cell_change_colour(wb, lists, i.replace("D", "E"), "FDDA0D")
 
     for i in formula_error_if:
-        cell_write(wb, lists, i.replace("D", "E"), "Formula error")
+        cell_write(wb, lists, i.replace("D", "E"), "Wrong function used")
         cell_change_colour(wb, lists, i.replace("D", "E"), "FDDA0D")
 
     for i in wrong_answer_if:
         cell_write(wb, lists, i.replace("D", "E"), "Wrong answer")
+        cell_change_colour(wb, lists, i.replace("D", "E"), "FDDA0D")
+
+    for i in empty:
+        cell_write(wb, lists, i.replace("D", "E"), "Cell is empty")
         cell_change_colour(wb, lists, i.replace("D", "E"), "FDDA0D")
 
     for i in good_else:
@@ -463,18 +539,18 @@ def logical_functions(student_file, wb):
 
     for i in not_formula_else:
         if i.find("D") != -1:
-            cell_write(wb, lists, i.replace("D", "F"), "Not a formula")
+            cell_write(wb, lists, i.replace("D", "F"), "Not a function")
             cell_change_colour(wb, lists, i.replace("D", "F"), "FDDA0D")
         if i.find("E") != -1:
-            cell_write(wb, lists, i.replace("E", "G"), "Not a formula")
+            cell_write(wb, lists, i.replace("E", "G"), "Not a function")
             cell_change_colour(wb, lists, i.replace("E", "G"), "FDDA0D")
 
     for i in formula_error_else:
         if i.find("D") != -1:
-            cell_write(wb, lists, i.replace("D", "F"), "Formula error")
+            cell_write(wb, lists, i.replace("D", "F"), "Wrong function used")
             cell_change_colour(wb, lists, i.replace("D", "F"), "FDDA0D")
         if i.find("E") != -1:
-            cell_write(wb, lists, i.replace("E", "G"), "Formula error")
+            cell_write(wb, lists, i.replace("E", "G"), "Wrong function used")
             cell_change_colour(wb, lists, i.replace("E", "G"), "FDDA0D")
 
     for i in wrong_answer_else:
@@ -485,12 +561,22 @@ def logical_functions(student_file, wb):
             cell_write(wb, lists, i.replace("E", "G"), "Wrong answer")
             cell_change_colour(wb, lists, i.replace("E", "G"), "FDDA0D")
 
+    for i in empty_else:
+        if i.find("D") != -1:
+            cell_write(wb, lists, i.replace("D", "F"), "Cell is empty")
+            cell_change_colour(wb, lists, i.replace("D", "F"), "FDDA0D")
+        if i.find("E") != -1:
+            cell_write(wb, lists, i.replace("E", "G"), "Cell is empty")
+            cell_change_colour(wb, lists, i.replace("E", "G"), "FDDA0D")
+
+
 def lookup_functions(student_file, wb):
     lists = "lookup functions"
     months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun"]
 
     good = []
     bad = []
+    empty = []
 
     not_formula = []
     formula_error = []
@@ -500,20 +586,24 @@ def lookup_functions(student_file, wb):
 
     for key, value in look_up.items():
         formula = cell_string(wb, lists, key)
-        if is_formula(formula):
-            if formula.find('VLOOKUP') != -1:
-                delete_excel_cell_formating(wb, lists, key)
-                if cell_answer(student_file, lists, key) == value:
-                    good.append(key)
+        if check_if_cell_empty(cell_answer(student_file, lists, key)):
+            empty.append(key)
+            continue
+        else:
+            if is_formula(formula):
+                if formula.find('VLOOKUP') != -1:
+                    delete_excel_cell_formating(wb, lists, key)
+                    if cell_answer(student_file, lists, key) == value:
+                        good.append(key)
+                    else:
+                        bad.append(key)
+                        wrong_answer.append(key)
                 else:
                     bad.append(key)
-                    wrong_answer.append(key)
+                    formula_error.append(key)
             else:
                 bad.append(key)
-                formula_error.append(key)
-        else:
-            bad.append(key)
-            not_formula.append(key)
+                not_formula.append(key)
 
     jaanuar = dict(Week1=[1, 1, 272], Week2=[1, 2, 112], Week3=[1, 3, 282], Week4=[1, 4, 114])
     veebruar = dict(Week1=[2, 1, 251], Week2=[2, 2, 363], Week3=[2, 3, 59], Week4=[2, 4, 421])
@@ -532,20 +622,24 @@ def lookup_functions(student_file, wb):
 
     for key, value in answers.items():
         formula = cell_string(wb, lists, key)
-        if is_formula(formula):
-            if formula.find(value[1]) != -1:
-                delete_excel_cell_formating(wb, lists, key)
-                if cell_answer(student_file, lists, key) == value[0]:
-                    good.append(key)
+        if check_if_cell_empty(cell_answer(student_file, lists, key)):
+            empty.append(key)
+            continue
+        else:
+            if is_formula(formula):
+                if formula.find(value[1]) != -1:
+                    delete_excel_cell_formating(wb, lists, key)
+                    if cell_answer(student_file, lists, key) == value[0]:
+                        good.append(key)
+                    else:
+                        bad.append(key)
+                        wrong_answer.append(key)
                 else:
                     bad.append(key)
-                    wrong_answer.append(key)
+                    formula_error.append(key)
             else:
                 bad.append(key)
-                formula_error.append(key)
-        else:
-            bad.append(key)
-            not_formula.append(key)
+                not_formula.append(key)
 
     categ = ["OVH (overheads)", "MAT (material)", "OGS (other goods/services)", "SAL (salaries)", "DEP (depreciation)"]
 
@@ -561,29 +655,34 @@ def lookup_functions(student_file, wb):
 
     formula = cell_string(wb, lists, "D33")
     formula2 = cell_string(wb, lists, "D35")
-
-    if is_formula(formula) and is_formula(formula2):
-        if formula.find("CONCATENATE") != -1 and formula2.find("SUM") != -1:
-            delete_excel_cell_formating(wb, lists, "D33")
-            delete_excel_cell_formating(wb, lists, "D35")
-            if str(cell_answer(student_file, lists, "D33")) == str(categ2[cat][0]) and str(cell_answer(student_file, lists, "D35")) == str(categ2[cat][1]):
-                good.append("D33")
-                good.append("D35")
+    if check_if_cell_empty(cell_answer(student_file, lists, "D33")):
+        empty.append("D33")
+    elif check_if_cell_empty(cell_answer(student_file, lists, "D35")):
+        empty.append("D35")
+    else:
+        if is_formula(formula) and is_formula(formula2):
+            if formula.find("CONCATENATE") != -1 and formula2.find("SUM") != -1:
+                delete_excel_cell_formating(wb, lists, "D33")
+                delete_excel_cell_formating(wb, lists, "D35")
+                if str(cell_answer(student_file, lists, "D33")) == str(categ2[cat][0]) and str(
+                        cell_answer(student_file, lists, "D35")) == str(categ2[cat][1]):
+                    good.append("D33")
+                    good.append("D35")
+                else:
+                    bad.append("D33")
+                    bad.append("D35")
+                    wrong_answer.append("D33")
+                    wrong_answer.append("D35")
             else:
                 bad.append("D33")
                 bad.append("D35")
-                wrong_answer.append("D33")
-                wrong_answer.append("D35")
+                formula_error.append("D33")
+                formula_error.append("D35")
         else:
             bad.append("D33")
             bad.append("D35")
-            formula_error.append("D33")
-            formula_error.append("D35")
-    else:
-        bad.append("D33")
-        bad.append("D35")
-        not_formula.append("D33")
-        not_formula.append("D35")
+            not_formula.append("D33")
+            not_formula.append("D35")
 
     for i in good:
         cell_change_colour(wb, lists, i, "33FF33")
@@ -593,25 +692,24 @@ def lookup_functions(student_file, wb):
 
     for i in not_formula:
         if i.find("F") != -1:
-            cell_write(wb, lists, i.replace("F", "E"), "Not a formula")
+            cell_write(wb, lists, i.replace("F", "E"), "Not a function")
             cell_change_colour(wb, lists, i.replace("F", "E"), "FDDA0D")
         if i.find("C") != -1:
-            cell_write(wb, lists, i.replace("C", "F"), "Not a formula")
+            cell_write(wb, lists, i.replace("C", "F"), "Not a function")
             cell_change_colour(wb, lists, i.replace("C", "F"), "FDDA0D")
         if i.find("D") != -1:
-            cell_write(wb, lists, i.replace("D", "I"), "Not a formula")
+            cell_write(wb, lists, i.replace("D", "I"), "Not a function")
             cell_change_colour(wb, lists, i.replace("D", "I"), "FDDA0D")
-
 
     for i in formula_error:
         if i.find("F") != -1:
-            cell_write(wb, lists, i.replace("F", "E"), "Formula error")
+            cell_write(wb, lists, i.replace("F", "E"), "Wrong function used")
             cell_change_colour(wb, lists, i.replace("F", "E"), "FDDA0D")
         if i.find("C") != -1:
-            cell_write(wb, lists, i.replace("C", "F"), "Formula error")
+            cell_write(wb, lists, i.replace("C", "F"), "Wrong function used")
             cell_change_colour(wb, lists, i.replace("C", "F"), "FDDA0D")
         if i.find("D") != -1:
-            cell_write(wb, lists, i.replace("D", "I"), "Not a formula")
+            cell_write(wb, lists, i.replace("D", "I"), "Wrong function used")
             cell_change_colour(wb, lists, i.replace("D", "I"), "FDDA0D")
 
     for i in wrong_answer:
@@ -622,5 +720,154 @@ def lookup_functions(student_file, wb):
             cell_write(wb, lists, i.replace("C", "F"), "Wrong answer")
             cell_change_colour(wb, lists, i.replace("C", "F"), "FDDA0D")
         if i.find("D") != -1:
-            cell_write(wb, lists, i.replace("D", "I"), "Not a formula")
+            cell_write(wb, lists, i.replace("D", "I"), "Wrong answer")
             cell_change_colour(wb, lists, i.replace("D", "I"), "FDDA0D")
+
+    for i in empty:
+        if i.find("F") != -1:
+            cell_write(wb, lists, i.replace("F", "E"), "Cell is empty")
+            cell_change_colour(wb, lists, i.replace("F", "E"), "FDDA0D")
+        if i.find("C") != -1:
+            cell_write(wb, lists, i.replace("C", "F"), "Cell is empty")
+            cell_change_colour(wb, lists, i.replace("C", "F"), "FDDA0D")
+        if i.find("D") != -1:
+            cell_write(wb, lists, i.replace("D", "I"), "Cell is empty")
+            cell_change_colour(wb, lists, i.replace("D", "I"), "FDDA0D")
+
+
+def list_from_txt(file):
+    with open(file, "r") as f:
+        lines = f.readlines()
+    return lines
+
+def copy_file(file):
+    shutil.copy(file, file.replace(".xlsx", "_copy.xlsx"))
+
+def create_zip(name):
+    zipObj = ZipFile(name + '.zip', 'w')
+    zipObj.close()
+
+def add_file_to_zip(file, name):
+    zipObj = ZipFile(name + '.zip', 'a')
+    zipObj.write(file)
+    zipObj.close()
+
+def add_file_to_zip_without_directory(file, name):
+    zipObj = ZipFile(name + '.zip', 'a')
+    zipObj.write(file, os.path.basename(file))
+    zipObj.close()
+
+def delete_file(file):
+    os.remove(file)
+
+
+def validation_functions(student_file, wb):
+    sheet = wb.active
+    lists = "Validation"
+
+    good = []
+    bad = []
+
+    not_a_validation = []
+    bad_type = []
+    false_operator = []
+    wrong_formula = []
+
+    validation_data = []
+    for data_val in sheet.data_validations.dataValidation:
+        cell_data = []
+        type = data_val.type
+        adress = data_val.sqref
+        operator = data_val.operator
+        formula1 = data_val.formula1
+        formula2 = data_val.formula2
+        cell_data.extend([adress, type, operator, formula1, formula2])
+        validation_data.append(cell_data)
+
+    for i in range(len(validation_data)):
+        if (str(validation_data[i][0]).find("C3")) != -1:
+            if str(validation_data[i][1]) == "decimal":
+                if str(validation_data[i][2]) == "greaterThanOrEqual":
+                    if str(validation_data[i][3]) == "0.0":
+                        for j in range(5):
+                            good.append("C" + str(j + 3))
+                    else:
+                        for j in range(5):
+                            bad.append("C" + str(j + 3))
+                        wrong_formula.append("C3")
+                else:
+                    for j in range(5):
+                        bad.append("C" + str(j + 3))
+                    wrong_formula.append("C3")
+            else:
+                for j in range(5):
+                    bad.append("C" + str(j + 3))
+                bad_type.append("C3")
+        if (str(validation_data[i][0]).find("E3")) != -1:
+            if str(validation_data[i][1]) == "date":
+                if str(validation_data[i][3]) == "$H$1" and str(validation_data[i][4]) == "$H$2":
+                    for j in range(5):
+                        good.append("E" + str(j + 3))
+                else:
+                    for j in range(5):
+                        bad.append("E" + str(j + 3))
+                    wrong_formula.append("E3")
+            else:
+                for j in range(5):
+                    bad.append("E" + str(j + 3))
+                bad_type.append("E3")
+
+        if (str(validation_data[i][0]).find("D3")) != -1:
+            if str(validation_data[i][1]) == "custom":
+                if str(validation_data[i][3]) == 'ISTEXT(D3)':
+                    for j in range(5):
+                        good.append("D" + str(j + 3))
+                else:
+                    for j in range(5):
+                        bad.append("D" + str(j + 3))
+                    wrong_formula.append("D3")
+            else:
+                for j in range(5):
+                    bad.append("D" + str(j + 3))
+                bad_type.append("D3")
+
+        if (str(validation_data[i][0]).find("B3")) != -1:
+            if str(validation_data[i][1]) == "list":
+                if str(validation_data[i][3]) == "$G$6:$G$9":
+                    for j in range(5):
+                        good.append("B" + str(j + 3))
+                else:
+                    for j in range(5):
+                        bad.append("B" + str(j + 3))
+                    wrong_formula.append("B3")
+            else:
+                for j in range(5):
+                    bad.append("B" + str(j + 3))
+                bad_type.append("B3")
+
+        for i in good:
+            cell_change_colour(wb, lists, i, "33FF33")
+
+        for i in bad:
+            cell_change_colour(wb, lists, i, "FF6666")
+
+        for i in not_a_validation:
+            vals = str(i[0]) + str(int(i[1:]) + 7)
+            cell_write(wb, lists, vals, "Not a validation")
+            cell_change_colour(wb, lists, vals, "FDDA0D")
+
+        for i in bad_type:
+            vals = str(i[0]) + str(int(i[1:]) + 7)
+            cell_write(wb, lists, vals, "Wrong Type")
+            cell_change_colour(wb, lists, vals, "FDDA0D")
+
+        for i in false_operator:
+            vals = str(i[0]) + str(int(i[1:]) + 7)
+            cell_write(wb, lists, vals, "False operator")
+            cell_change_colour(wb, lists, vals, "FDDA0D")
+
+        for i in wrong_formula:
+            vals = str(i[0]) + str(int(i[1:]) + 7)
+            cell_write(wb, lists, vals, "Wrong formula")
+            cell_change_colour(wb, lists, vals, "FDDA0D")
+
