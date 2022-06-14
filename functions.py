@@ -783,7 +783,6 @@ def validation_functions(student_file, wb):
         formula2 = data_val.formula2
         cell_data.extend([adress, type, operator, formula1, formula2])
         validation_data.append(cell_data)
-    print(validation_data)
     for i in range(len(validation_data)):
         if (str(validation_data[i][0]).find("C3")) != -1:
             if str(validation_data[i][1]) == "whole":
