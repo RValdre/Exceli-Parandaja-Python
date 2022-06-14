@@ -1,11 +1,20 @@
 from functions import *
 
-student_file = r"homework1-2 (answers) (1).xlsx"
-wb = openpyxl.load_workbook(student_file)
+student_file = list_from_txt("uploaded-files-info.txt")
+for i in student_file:
+    if i.endswith("\n"):
+        i = i[:-1]
+    wb_start = r""
+    file = wb_start + str(i)
+    exea = file.replace("\\", "/")
 
-logical_functions(student_file, wb)
-date_functions(student_file, wb)
-lookup_functions(student_file, wb)
+    wb_start = r""
 
-wb.save(student_file)
-wb.close()
+    wb = openpyxl.load_workbook(exea)
+
+    logical_functions(student_file, wb)
+    date_functions(student_file, wb)
+    lookup_functions(student_file, wb)
+
+    wb.save(exea)
+    wb.close()

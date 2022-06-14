@@ -624,3 +624,15 @@ def lookup_functions(student_file, wb):
         if i.find("D") != -1:
             cell_write(wb, lists, i.replace("D", "I"), "Not a formula")
             cell_change_colour(wb, lists, i.replace("D", "I"), "FDDA0D")
+
+
+def list_from_txt(file):
+    with open(file, "r") as f:
+        lines = f.readlines()
+    return lines
+
+def list_from_txt_delete(file):
+    lines = list_from_txt("student_file.txt")
+    for i in range(len(lines)):
+        lines[i] = lines[i].replace("\n", "")
+    return lines
