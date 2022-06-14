@@ -9,6 +9,7 @@ for i in student_file:
         i = i[:-5]
     wb_start = r""
     file = wb_start + str(i)
+
     exea = file.replace("\\", "/")
     copy_file(exea)
     exea = exea.replace(".xlsx", "_copy.xlsx")

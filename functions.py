@@ -762,7 +762,7 @@ def delete_file(file):
 
 
 def validation_functions(student_file, wb):
-    sheet = wb.active
+    sheet = wb["Validation"]
     lists = "Validation"
 
     good = []
@@ -783,18 +783,13 @@ def validation_functions(student_file, wb):
         formula2 = data_val.formula2
         cell_data.extend([adress, type, operator, formula1, formula2])
         validation_data.append(cell_data)
-
+    print(validation_data)
     for i in range(len(validation_data)):
         if (str(validation_data[i][0]).find("C3")) != -1:
-            if str(validation_data[i][1]) == "decimal":
+            if str(validation_data[i][1]) == "whole":
                 if str(validation_data[i][2]) == "greaterThanOrEqual":
-                    if str(validation_data[i][3]) == "0.0":
-                        for j in range(5):
-                            good.append("C" + str(j + 3))
-                    else:
-                        for j in range(5):
-                            bad.append("C" + str(j + 3))
-                        wrong_formula.append("C3")
+                    for j in range(5):
+                        good.append("C" + str(j + 3))
                 else:
                     for j in range(5):
                         bad.append("C" + str(j + 3))
@@ -833,7 +828,7 @@ def validation_functions(student_file, wb):
 
         if (str(validation_data[i][0]).find("B3")) != -1:
             if str(validation_data[i][1]) == "list":
-                if str(validation_data[i][3]) == "$G$6:$G$9":
+                if str(validation_data[i][3]) == '$G$5:$G$9':
                     for j in range(5):
                         good.append("B" + str(j + 3))
                 else:
@@ -844,6 +839,15 @@ def validation_functions(student_file, wb):
                 for j in range(5):
                     bad.append("B" + str(j + 3))
                 bad_type.append("B3")
+
+    check_list = ["C3", "E3", "D3", "B3"]
+    for i in check_list:
+        if sheet[i].style == "Normal":
+            for j in range(5):
+                bad.append(i[0]+ str(j + 3))
+            not_a_validation.append(i)
+
+
 
         for i in good:
             cell_change_colour(wb, lists, i, "33FF33")
