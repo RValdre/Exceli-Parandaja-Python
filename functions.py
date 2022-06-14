@@ -87,7 +87,7 @@ def sum_count(student_file,wb):
         formula = cell_string(wb, lists, key)
 
         if is_formula(formula):
-           if formula.find('COUNTIF') > 0 or formula.find('COUNTIFS') > 0:
+           if formula.find('COUNTIF') != -1 or formula.find('COUNTIFS') != -1:
                delete_excel_cell_formating(wb, lists, key)
                if cell_answer(student_file, lists, key) == value:
                    good.append(key)
@@ -107,7 +107,7 @@ def sum_count(student_file,wb):
         formula = cell_string(wb, lists, key)
 
         if is_formula(formula):
-           if formula.find('SUMIF') > 0 or formula.find('SUMIFS') > 0:
+           if formula.find('SUMIF') != -1 or formula.find('SUMIFS') != -1:
                delete_excel_cell_formating(wb, lists, key)
                if cell_answer(student_file, lists, key) == value:
                    good.append(key)
@@ -174,7 +174,7 @@ def text_functions(student_file, wb):
         formula = cell_string(wb, lists, key)
 
         if is_formula(formula):
-            if formula.find('IF') > 0 or formula.find('IFS') > 0:
+            if formula.find('IF') != -1 or formula.find('IFS') != -1:
                 delete_excel_cell_formating(wb, lists, key)
                 if cell_answer(student_file, lists, key) == value:
                     good.append(key)
@@ -258,7 +258,7 @@ def date_functions(student_file, wb):
         formula = cell_string(wb, lists, key)
 
         if is_formula(formula):
-            if formula.find('DATE') > 0 or formula.find('DATES') > 0:
+            if formula.find('DATE') != -1 or formula.find('DATES') != -1:
                 delete_excel_cell_formating(wb, lists, key)
                 if str(cell_answer(student_file, lists, key)) == str(value):
                     good.append(key)
@@ -277,7 +277,7 @@ def date_functions(student_file, wb):
         formula = cell_string(wb, lists, key)
 
         if is_formula(formula):
-            if formula.find('WEEKDAY') > 0 or formula.find('WEEKDAYS') > 0:
+            if formula.find('WEEKDAY') != -1 or formula.find('WEEKDAYS') != -1:
                 delete_excel_cell_formating(wb, lists, key)
                 if cell_answer(student_file, lists, key) == value:
                     good.append(key)
@@ -296,7 +296,7 @@ def date_functions(student_file, wb):
         formula = cell_string(wb, lists, key)
 
         if is_formula(formula):
-            if formula.find('EOMONTH') > 0 or formula.find('EOMONTHS') > 0:
+            if formula.find('EOMONTH') != -1 or formula.find('EOMONTHS') != -1:
                 delete_excel_cell_formating(wb, lists, key)
                 if str(cell_answer(student_file, lists, key)) == str(value):
                     good.append(key)
@@ -342,6 +342,22 @@ def date_functions(student_file, wb):
 
     for i in bad:
         cell_change_colour(wb, lists, i, "FF6666")
+
+    for i in not_formula:
+        vals = str(i[0]) + str(int(i[1:])+7)
+        cell_write(wb, lists, vals, "Not a formula")
+        cell_change_colour(wb, lists, vals, "FDDA0D")
+
+    for i in formula_error:
+        vals = str(i[0]) + str(int(i[1:])+7)
+        cell_write(wb, lists, vals, "Formula error")
+        cell_change_colour(wb, lists, vals, "FDDA0D")
+
+    for i in wrong_answer:
+        vals = str(i[0]) + str(int(i[1:]) + 7)
+        cell_write(wb, lists, vals, "Wrong answer")
+        cell_change_colour(wb, lists, vals, "FDDA0D")
+
 
 
 def logical_functions(student_file, wb):
