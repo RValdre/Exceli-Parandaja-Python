@@ -630,9 +630,3 @@ def list_from_txt(file):
     with open(file, "r") as f:
         lines = f.readlines()
     return lines
-
-def list_from_txt_delete(file):
-    lines = list_from_txt("student_file.txt")
-    for i in range(len(lines)):
-        lines[i] = lines[i].replace("\n", "")
-    return lines

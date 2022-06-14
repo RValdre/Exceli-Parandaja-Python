@@ -4,6 +4,8 @@ student_file = list_from_txt("uploaded-files-info.txt")
 for i in student_file:
     if i.endswith("\n"):
         i = i[:-1]
+    if i.endswith("false"):
+        i = i[:-1]
     wb_start = r""
     file = wb_start + str(i)
     exea = file.replace("\\", "/")
