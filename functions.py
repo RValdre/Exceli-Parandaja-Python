@@ -1,10 +1,10 @@
 import os
 import shutil
-from zipfile import ZipFile
+import time
 
 import openpyxl
 from openpyxl.styles import PatternFill
-import numpy as np
+from zipfile import ZipFile
 
 
 def cell_string(wb, sheet_name, cell_name):
@@ -18,10 +18,6 @@ def is_formula(cell_name):
         return False
     if str(cell_name)[0] == '=':
         return True
-
-
-def cell_adress_to_row_col(cell_adress):
-    return int(cell_adress[1:]) - 2, ord(cell_adress[0]) - ord('A')
 
 
 def cell_change_colour(wb, sheet_name, cell_name, colour):
@@ -43,30 +39,10 @@ def cell_answer(file_path, sheet_name, cell_name):
     return cell.value
 
 
-def delete_excel_table_formating(wb, sheet_name):
-    sheet = wb[sheet_name]
-    for row in sheet.iter_rows():
-        for cell in row:
-            cell.style = 'Normal'
-
-
 def delete_excel_cell_formating(wb, sheet_name, cell_name):
     sheet = wb[sheet_name]
     cell = sheet[cell_name]
     cell.style = 'Normal'
-
-
-def unique(list1):
-    x = np.array(list1)
-    return np.unique(x)
-
-
-def read_files_from_folder(folder_path):
-    files = []
-    for file in os.listdir(folder_path):
-        if file.endswith(".xlsx"):
-            files.append(file)
-    return files
 
 
 def sum_count(student_file, wb):
@@ -151,7 +127,7 @@ def sum_count(student_file, wb):
 
 
 def check_if_cell_empty(value):
-    if value == None:
+    if value is None:
         return True
     else:
         return False
@@ -645,22 +621,17 @@ def lookup_functions(student_file, wb):
 
     categ = ["OVH (overheads)", "MAT (material)", "OGS (other goods/services)", "SAL (salaries)", "DEP (depreciation)"]
 
-    ovhCategory = ["ovhCategory", 1177]
-    matCategory = ["matCategory", 761]
-    ogsCategory = ["ogsCategory", 1385]
-    salCategory = ["salCategory", 2013]
-    depCategory = ["depCategory", 1003]
-
-    categ2 = [ovhCategory, matCategory, ogsCategory, salCategory, depCategory]
+    categ2 = [["ovhCategory", 1177], ["matCategory", 761], ["ogsCategory", 1385], ["salCategory", 2013],
+              ["depCategory", 1003]]
     value_of = str(cell_string(wb, lists, "D31"))
     cat = categ.index(value_of)
 
     formula = cell_string(wb, lists, "D33")
     formula2 = cell_string(wb, lists, "D35")
-    if check_if_cell_empty(cell_answer(student_file, lists, "D33")):
+    if check_if_cell_empty(cell_answer(student_file, lists, "D33")) or check_if_cell_empty(cell_answer(student_file, lists, "D35")):
         empty.append("D33")
         bad.append("D33")
-    elif check_if_cell_empty(cell_answer(student_file, lists, "D35")):
+
         empty.append("D35")
         bad.append("D35")
     else:
@@ -744,28 +715,27 @@ def list_from_txt(file):
         lines = f.readlines()
     return lines
 
+
 def copy_file(file):
     shutil.copy(file, file.replace(".xlsx", "_copy.xlsx"))
 
-def create_zip(name):
-    zipObj = ZipFile(name + '.zip', 'w')
-    zipObj.close()
 
-def add_file_to_zip(file, name):
-    zipObj = ZipFile(name + '.zip', 'a')
-    zipObj.write(file)
-    zipObj.close()
+def create_zip(name):
+    zip_obj = ZipFile(name + '.zip', 'w')
+    zip_obj.close()
+
 
 def add_file_to_zip_without_directory(file, name):
-    zipObj = ZipFile(name + '.zip', 'a')
-    zipObj.write(file, os.path.basename(file))
-    zipObj.close()
+    zip_obj = ZipFile(name + '.zip', 'a')
+    zip_obj.write(file, os.path.basename(file))
+    zip_obj.close()
+
 
 def delete_file(file):
     os.remove(file)
 
 
-def validation_functions(student_file, wb):
+def validation_functions(wb):
     sheet = wb["Validation"]
     lists = "Validation"
 
@@ -780,12 +750,12 @@ def validation_functions(student_file, wb):
     validation_data = []
     for data_val in sheet.data_validations.dataValidation:
         cell_data = []
-        type = data_val.type
+        types = data_val.type
         adress = data_val.sqref
         operator = data_val.operator
         formula1 = data_val.formula1
         formula2 = data_val.formula2
-        cell_data.extend([adress, type, operator, formula1, formula2])
+        cell_data.extend([adress, types, operator, formula1, formula2])
         validation_data.append(cell_data)
 
     for i in range(len(validation_data)):
@@ -877,8 +847,8 @@ def validation_functions(student_file, wb):
         cell_write(wb, lists, vals, "Wrong formula")
         cell_change_colour(wb, lists, vals, "FDDA0D")
 
-def conditional_function(student_file, wb):
 
+def conditional_function(wb):
     sheet = wb["Conditional formatting"]
     lists = "Conditional formatting"
     answer = []
@@ -887,7 +857,6 @@ def conditional_function(student_file, wb):
     bad = []
 
     not_a_validation = []
-
 
     for row in sheet.conditional_formatting:
         wz = str(row.cfRule[0]).split(", ")
@@ -909,7 +878,6 @@ def conditional_function(student_file, wb):
                     bad.append("D26")
             else:
                 bad.append("D26")
-
 
         if (str(answer[i][0]).find("C2")) != -1:
             if str(answer[i][1]).find("containsText") != -1:
@@ -957,4 +925,33 @@ def conditional_function(student_file, wb):
 
     for i in bad:
         cell_change_colour(wb, lists, i, "FF6666")
-        cell_write(wb, lists, i, "Conditional formatis incorrect")
+        cell_write(wb, lists, i, "Conditional format incorrect")
+
+
+def file_check(file):
+    if file.endswith("\n"):
+        file = file[:-1]
+    if file.endswith("false"):
+        file = file[:-5]
+    wb_start = r""
+    file = wb_start + str(file)
+
+    this_file = file.replace("\\", "/")
+    copy_file(this_file)
+    this_file = this_file.replace(".xlsx", "_copy.xlsx")
+    return this_file
+
+
+def finish():
+    print("-------------------")
+    print("Files are zipped")
+
+    time.sleep(10)
+
+
+def end_of_testing(wb, this_file, count, file_list, name):
+    wb.save(this_file)
+    wb.close()
+    print(str(count) + "/" + str(len(file_list)) + " have been controlled")
+    add_file_to_zip_without_directory(this_file, name)
+    delete_file(this_file)

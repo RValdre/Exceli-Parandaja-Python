@@ -1,35 +1,20 @@
-from functions import *
-import time
+from functions import create_zip, list_from_txt, validation_functions, sum_count, text_functions, \
+    file_check, finish, end_of_testing
+from openpyxl import load_workbook
 
 name = "homework1_1"
-student_file = list_from_txt("uploaded-files-info.txt")
 create_zip(name)
 count = 1
-for i in student_file:
-    if i.endswith("\n"):
-        i = i[:-1]
-    if i.endswith("false"):
-        i = i[:-5]
-    wb_start = r""
-    file = wb_start + str(i)
+file_list = list_from_txt("uploaded-files-info.txt")
+for i in file_list:
+    this_file = file_check(i)
 
-    exea = file.replace("\\", "/")
-    copy_file(exea)
-    exea = exea.replace(".xlsx", "_copy.xlsx")
+    wb = load_workbook(this_file)
 
-    wb = openpyxl.load_workbook(exea)
+    validation_functions(wb)
+    sum_count(this_file, wb)
+    text_functions(this_file, wb)
 
-    validation_functions(exea, wb)
-    sum_count(exea, wb)
-    text_functions(exea, wb)
-
-    wb.save(exea)
-    wb.close()
-    print(str(count) + "/"+ str(len(student_file)) +" have been controlled")
-    add_file_to_zip_without_directory(exea,name)
-    delete_file(exea)
+    end_of_testing(wb, this_file, count, file_list, name)
     count = count + 1
-print("-------------------")
-print("Files are zipped")
-
-time.sleep(10)
+finish()
