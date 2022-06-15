@@ -588,6 +588,7 @@ def lookup_functions(student_file, wb):
         formula = cell_string(wb, lists, key)
         if check_if_cell_empty(cell_answer(student_file, lists, key)):
             empty.append(key)
+            bad.append(key)
             continue
         else:
             if is_formula(formula):
@@ -624,6 +625,7 @@ def lookup_functions(student_file, wb):
         formula = cell_string(wb, lists, key)
         if check_if_cell_empty(cell_answer(student_file, lists, key)):
             empty.append(key)
+            bad.append(key)
             continue
         else:
             if is_formula(formula):
@@ -657,8 +659,10 @@ def lookup_functions(student_file, wb):
     formula2 = cell_string(wb, lists, "D35")
     if check_if_cell_empty(cell_answer(student_file, lists, "D33")):
         empty.append("D33")
+        bad.append("D33")
     elif check_if_cell_empty(cell_answer(student_file, lists, "D35")):
         empty.append("D35")
+        bad.append("D35")
     else:
         if is_formula(formula) and is_formula(formula2):
             if formula.find("CONCATENATE") != -1 and formula2.find("SUM") != -1:
@@ -692,8 +696,8 @@ def lookup_functions(student_file, wb):
 
     for i in not_formula:
         if i.find("F") != -1:
-            cell_write(wb, lists, i.replace("F", "E"), "Not a function")
-            cell_change_colour(wb, lists, i.replace("F", "E"), "FDDA0D")
+            cell_write(wb, lists, i.replace("F", "G"), "Not a function")
+            cell_change_colour(wb, lists, i.replace("F", "G"), "FDDA0D")
         if i.find("C") != -1:
             cell_write(wb, lists, i.replace("C", "F"), "Not a function")
             cell_change_colour(wb, lists, i.replace("C", "F"), "FDDA0D")
@@ -703,8 +707,8 @@ def lookup_functions(student_file, wb):
 
     for i in formula_error:
         if i.find("F") != -1:
-            cell_write(wb, lists, i.replace("F", "E"), "Wrong function used")
-            cell_change_colour(wb, lists, i.replace("F", "E"), "FDDA0D")
+            cell_write(wb, lists, i.replace("F", "G"), "Wrong function used")
+            cell_change_colour(wb, lists, i.replace("F", "G"), "FDDA0D")
         if i.find("C") != -1:
             cell_write(wb, lists, i.replace("C", "F"), "Wrong function used")
             cell_change_colour(wb, lists, i.replace("C", "F"), "FDDA0D")
@@ -714,8 +718,8 @@ def lookup_functions(student_file, wb):
 
     for i in wrong_answer:
         if i.find("F") != -1:
-            cell_write(wb, lists, i.replace("F", "E"), "Wrong answer")
-            cell_change_colour(wb, lists, i.replace("F", "E"), "FDDA0D")
+            cell_write(wb, lists, i.replace("F", "G"), "Wrong answer")
+            cell_change_colour(wb, lists, i.replace("F", "G"), "FDDA0D")
         if i.find("C") != -1:
             cell_write(wb, lists, i.replace("C", "F"), "Wrong answer")
             cell_change_colour(wb, lists, i.replace("C", "F"), "FDDA0D")
@@ -725,8 +729,8 @@ def lookup_functions(student_file, wb):
 
     for i in empty:
         if i.find("F") != -1:
-            cell_write(wb, lists, i.replace("F", "E"), "Cell is empty")
-            cell_change_colour(wb, lists, i.replace("F", "E"), "FDDA0D")
+            cell_write(wb, lists, i.replace("F", "G"), "Cell is empty")
+            cell_change_colour(wb, lists, i.replace("F", "G"), "FDDA0D")
         if i.find("C") != -1:
             cell_write(wb, lists, i.replace("C", "F"), "Cell is empty")
             cell_change_colour(wb, lists, i.replace("C", "F"), "FDDA0D")
@@ -873,3 +877,84 @@ def validation_functions(student_file, wb):
         cell_write(wb, lists, vals, "Wrong formula")
         cell_change_colour(wb, lists, vals, "FDDA0D")
 
+def conditional_function(student_file, wb):
+
+    sheet = wb["Conditional formatting"]
+    lists = "Conditional formatting"
+    answer = []
+
+    good = []
+    bad = []
+
+    not_a_validation = []
+
+
+    for row in sheet.conditional_formatting:
+        wz = str(row.cfRule[0]).split(", ")
+
+        answer.append(
+            [row.cells, str(str(wz[0])).replace("<openpyxl.formatting.rule.Rule object>\nParameters:\ntype=", " "),
+             wz[4],
+             wz[16]])
+
+    for i in range(len(answer)):
+        if (str(answer[i][0]).find("D2")) != -1:
+            if str(answer[i][1]).find(" 'cellIs'") != -1:
+                if str(answer[i][2]).find("greaterThan") != -1:
+                    if str(answer[i][3]).find('200') != -1:
+                        good.append("D26")
+                    else:
+                        bad.append("D26")
+                else:
+                    bad.append("D26")
+            else:
+                bad.append("D26")
+
+
+        if (str(answer[i][0]).find("C2")) != -1:
+            if str(answer[i][1]).find("containsText") != -1:
+                if str(answer[i][2]).find("containsText") != -1:
+                    if str(answer[i][3]).find('SEARCH') != -1:
+                        good.append("C26")
+                    else:
+                        bad.append("C26")
+                else:
+                    bad.append("C26")
+            else:
+                bad.append("C26")
+
+        if (str(answer[i][0]).find("E2")) != -1:
+            if str(answer[i][1]).find("colorScale") != -1:
+                if str(answer[i][3]).find('max') != -1:
+                    good.append("E26")
+                else:
+                    bad.append("E26")
+
+            else:
+                bad.append("E26")
+
+        if (str(answer[i][0]).find("H2")) != -1:
+            if str(answer[i][1]).find("cellIs") != -1:
+                if str(answer[i][2]).find("greaterThan") != -1:
+                    if str(answer[i][3]).find('$J$2+15') != -1:
+                        good.append("H26")
+                    else:
+                        bad.append("H26")
+                else:
+                    bad.append("H26")
+            else:
+                bad.append("H26")
+
+    for i in good:
+        cell_change_colour(wb, lists, i, "33FF33")
+        cell_write(wb, lists, i, "Conditional format is correct")
+
+    check_list = ["C26", "D26", "H26", "E26"]
+    for i in check_list:
+        if i not in good:
+            bad.append(i)
+            not_a_validation.append(i)
+
+    for i in bad:
+        cell_change_colour(wb, lists, i, "FF6666")
+        cell_write(wb, lists, i, "Conditional formatis incorrect")
