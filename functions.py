@@ -783,9 +783,10 @@ def validation_functions(student_file, wb):
         formula2 = data_val.formula2
         cell_data.extend([adress, type, operator, formula1, formula2])
         validation_data.append(cell_data)
+
     for i in range(len(validation_data)):
         if (str(validation_data[i][0]).find("C3")) != -1:
-            if str(validation_data[i][1]) == "whole":
+            if str(validation_data[i][1]) == "whole" or str(validation_data[i][1]) == "decimal":
                 if str(validation_data[i][2]) == "greaterThanOrEqual":
                     for j in range(5):
                         good.append("C" + str(j + 3))
@@ -827,7 +828,7 @@ def validation_functions(student_file, wb):
 
         if (str(validation_data[i][0]).find("B3")) != -1:
             if str(validation_data[i][1]) == "list":
-                if str(validation_data[i][3]) == '$G$5:$G$9':
+                if str(validation_data[i][3]) == '$G$5:$G$9' or str(validation_data[i][3]) == '$G$6:$G$9':
                     for j in range(5):
                         good.append("B" + str(j + 3))
                 else:
@@ -839,38 +840,36 @@ def validation_functions(student_file, wb):
                     bad.append("B" + str(j + 3))
                 bad_type.append("B3")
 
+    for i in good:
+        cell_change_colour(wb, lists, i, "33FF33")
+
     check_list = ["C3", "E3", "D3", "B3"]
     for i in check_list:
-        if sheet[i].style == "Normal":
+        if i not in good:
             for j in range(5):
-                bad.append(i[0]+ str(j + 3))
+                bad.append(i[0] + str(j + 3))
             not_a_validation.append(i)
 
+    for i in bad:
+        cell_change_colour(wb, lists, i, "FF6666")
 
+    for i in not_a_validation:
+        vals = str(i[0]) + str(int(i[1:]) + 7)
+        cell_write(wb, lists, vals, "Not a validation")
+        cell_change_colour(wb, lists, vals, "FDDA0D")
 
-        for i in good:
-            cell_change_colour(wb, lists, i, "33FF33")
+    for i in bad_type:
+        vals = str(i[0]) + str(int(i[1:]) + 7)
+        cell_write(wb, lists, vals, "Wrong Type")
+        cell_change_colour(wb, lists, vals, "FDDA0D")
 
-        for i in bad:
-            cell_change_colour(wb, lists, i, "FF6666")
+    for i in false_operator:
+        vals = str(i[0]) + str(int(i[1:]) + 7)
+        cell_write(wb, lists, vals, "False operator")
+        cell_change_colour(wb, lists, vals, "FDDA0D")
 
-        for i in not_a_validation:
-            vals = str(i[0]) + str(int(i[1:]) + 7)
-            cell_write(wb, lists, vals, "Not a validation")
-            cell_change_colour(wb, lists, vals, "FDDA0D")
-
-        for i in bad_type:
-            vals = str(i[0]) + str(int(i[1:]) + 7)
-            cell_write(wb, lists, vals, "Wrong Type")
-            cell_change_colour(wb, lists, vals, "FDDA0D")
-
-        for i in false_operator:
-            vals = str(i[0]) + str(int(i[1:]) + 7)
-            cell_write(wb, lists, vals, "False operator")
-            cell_change_colour(wb, lists, vals, "FDDA0D")
-
-        for i in wrong_formula:
-            vals = str(i[0]) + str(int(i[1:]) + 7)
-            cell_write(wb, lists, vals, "Wrong formula")
-            cell_change_colour(wb, lists, vals, "FDDA0D")
+    for i in wrong_formula:
+        vals = str(i[0]) + str(int(i[1:]) + 7)
+        cell_write(wb, lists, vals, "Wrong formula")
+        cell_change_colour(wb, lists, vals, "FDDA0D")
 
