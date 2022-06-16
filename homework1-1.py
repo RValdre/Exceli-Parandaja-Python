@@ -1,8 +1,11 @@
 from functions import create_zip, list_from_txt, validation_functions, sum_count, text_functions, \
-    file_check, finish, end_of_testing
+    file_check, finish, end_of_testing, script_start
 from openpyxl import load_workbook
+from warnings import filterwarnings
 
+filterwarnings("ignore")
 name = "homework1_1"
+script_start()
 create_zip(name)
 count = 1
 file_list = list_from_txt("uploaded-files-info.txt")

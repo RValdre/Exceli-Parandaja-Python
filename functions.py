@@ -628,7 +628,8 @@ def lookup_functions(student_file, wb):
 
     formula = cell_string(wb, lists, "D33")
     formula2 = cell_string(wb, lists, "D35")
-    if check_if_cell_empty(cell_answer(student_file, lists, "D33")) or check_if_cell_empty(cell_answer(student_file, lists, "D35")):
+    if check_if_cell_empty(cell_answer(student_file, lists, "D33")) or check_if_cell_empty(
+            cell_answer(student_file, lists, "D35")):
         empty.append("D33")
         bad.append("D33")
 
@@ -955,3 +956,9 @@ def end_of_testing(wb, this_file, count, file_list, name):
     print(str(count) + "/" + str(len(file_list)) + " have been controlled")
     add_file_to_zip_without_directory(this_file, name)
     delete_file(this_file)
+
+
+def script_start():
+    print("Script started")
+    print("Zip archive created")
+
