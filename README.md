@@ -3,7 +3,7 @@
 ![image](https://user-images.githubusercontent.com/90192553/173900491-166db1a4-7449-4d99-98d3-f959360063ca.png)
 
 # Lühikirjeldus
-Meie lahendus on mõeldud konkreetsete Exceli ülesannete kontrollimiseks. Valite ülesande - laadite üles õpilaste tööd tagastame teile vastuse ZIP-arhiivina, mis sisaldab õpilaste kontrollitud ülesandeid. Annab olenevalt vastustest erinevaid kommentaare.
+Meie lahendus on mõeldud konkreetsete Exceli ülesannete kontrollimiseks. Valite ülesande - laadite üles õpilaste tööd tagastame kasutajale vastused ZIP-arhiivina, mis sisaldab õpilaste kontrollitud ülesandeid. Vea tuvastamisel, lisab programm faili kommentaari vea kohta. Nt, kui peaks olema väljas valem/function ja välja on sisestatud vastus lihtsat numbrina siis kirjutab programm kommentaari: "Not a function"
 
 # Instituut
 ### Antud lahendus töötati välja [Tallinna Ülikoolis](https://www.tlu.ee/) kursuse raames - [Tarkvaraarenduse projekt (IFI6231.DT)]( https://ois2.tlu.ee/tluois/aine/IFI6231.DT)
