@@ -147,7 +147,7 @@ def text_functions(student_file, wb):
     fields = dict(B2="MA", B3="CA", B4="CA", B5="AZ", B6="TX", B10="1BB2", B11="1PT", B12="1Z", B13="D", B14="1V24C",
                   B15="1AA", B16="1ZFD3", C10="AC12", C11="AB34", C12="CD8", C13="PO65S3", C14="BV45", C15="DS96S",
                   C16="CD90")
-    if_fields = dict(B26=1300, D30="Pass", D31="Pass", D32="Fail", D33="Pass", D34="Pass", D35="Pass", D36="Fail")
+    if_fields = dict(B26=[1300,"1300"], D30=["P","p"], D31=["P","p"], D32=["F","f"], D33=["P","p"], D34=["P","p"], D35=["P","p"], D36=["F","f"])
 
     for key, value in fields.items():
 
@@ -159,7 +159,7 @@ def text_functions(student_file, wb):
         else:
             if is_formula(formula):
                 delete_excel_cell_formating(wb, lists, key)
-                if str(cell_answer(student_file, lists, key)) == str(value):
+                if str(cell_answer(student_file, lists, key)).strip() == str(value).strip():
                     good.append(key)
                 else:
                     bad.append(key)
@@ -176,16 +176,12 @@ def text_functions(student_file, wb):
             continue
         else:
             if is_formula(formula):
-                if formula.find('IF') != -1 or formula.find('IFS') != -1:
-                    delete_excel_cell_formating(wb, lists, key)
-                    if cell_answer(student_file, lists, key) == value:
-                        good.append(key)
-                    else:
-                        bad.append(key)
-                        wrong_answer.append(key)
+                delete_excel_cell_formating(wb, lists, key)
+                if str(cell_answer(student_file, lists, key)).find(str(value[0])) != -1 or str(cell_answer(student_file, lists, key)).find(str(value[1])) != -1:
+                    good.append(key)
                 else:
                     bad.append(key)
-                    formula_error.append(key)
+                    wrong_answer.append(key)
             else:
                 bad.append(key)
                 not_formula.append(key)
@@ -224,14 +220,14 @@ def text_functions(student_file, wb):
 
     for i in wrong_answer:
         if str(i).find("B") != -1:
-            cell_write(wb, lists, i.replace("B", "E"), "Wrong answer")
+            cell_write(wb, lists, i.replace("B", "E"), "Wrong answer or formula error")
             cell_change_colour(wb, lists, i.replace("B", "E"), "FDDA0D")
             cell_change_colour(wb, lists, i.replace("B", "F"), "FDDA0D")
         if str(i).find("C") != -1:
-            cell_write(wb, lists, i.replace("C", "F"), "Wrong answer")
+            cell_write(wb, lists, i.replace("C", "F"), "Wrong answer or formula error")
             cell_change_colour(wb, lists, i.replace("C", "F"), "FDDA0D")
         if str(i).find("D") != -1:
-            cell_write(wb, lists, i.replace("D", "G"), "Wrong answer")
+            cell_write(wb, lists, i.replace("D", "G"), "Wrong answer or formula error")
             cell_change_colour(wb, lists, i.replace("D", "G"), "FDDA0D")
             cell_change_colour(wb, lists, i.replace("D", "H"), "FDDA0D")
 
@@ -264,7 +260,7 @@ def date_functions(student_file, wb):
                  I4="2019-03-03 00:00:00")
     week = dict(F3=1, F4=2)
     end = dict(G3="2020-04-30 00:00:00", G4="2019-07-31 00:00:00")
-    func = dict(B8="=NOW()", D8="=HOUR(B8)", G8="=MINUTE(B8)")
+    func = dict(B8=["=NOW","TODAY"], D8=["HOUR","hour"], G8=["MINUTE", "minute"])
 
     for key, value in dates.items():
 
@@ -275,13 +271,9 @@ def date_functions(student_file, wb):
             continue
         else:
             if is_formula(formula):
-                if formula.find('DATE') != -1 or formula.find('DATES') != -1:
-                    delete_excel_cell_formating(wb, lists, key)
-                    if str(cell_answer(student_file, lists, key)) == str(value):
-                        good.append(key)
-                    else:
-                        bad.append(key)
-                        wrong_answer.append(key)
+                if formula.find('DATE') != -1 or formula.find('DATES') != -1 or formula.find('MONTH') != -1:
+                    good.append(key)
+
                 else:
                     bad.append(key)
                     formula_error.append(key)
@@ -300,11 +292,7 @@ def date_functions(student_file, wb):
             if is_formula(formula):
                 if formula.find('WEEKDAY') != -1 or formula.find('WEEKDAYS') != -1:
                     delete_excel_cell_formating(wb, lists, key)
-                    if cell_answer(student_file, lists, key) == value:
-                        good.append(key)
-                    else:
-                        bad.append(key)
-                        wrong_answer.append(key)
+                    good.append(key)
                 else:
                     bad.append(key)
                     formula_error.append(key)
@@ -323,11 +311,7 @@ def date_functions(student_file, wb):
             if is_formula(formula):
                 if formula.find('EOMONTH') != -1 or formula.find('EOMONTHS') != -1:
                     delete_excel_cell_formating(wb, lists, key)
-                    if str(cell_answer(student_file, lists, key)) == str(value):
-                        good.append(key)
-                    else:
-                        bad.append(key)
-                        wrong_answer.append(key)
+                    good.append(key)
                 else:
                     bad.append(key)
                     formula_error.append(key)
@@ -345,7 +329,7 @@ def date_functions(student_file, wb):
         else:
             if is_formula(formula):
                 delete_excel_cell_formating(wb, lists, key)
-                if formula.find(value) != -1:
+                if formula.find(value[0]) != -1 or formula.find(value[1]) != -1:
                     good.append(key)
                 else:
                     bad.append(key)
@@ -361,7 +345,7 @@ def date_functions(student_file, wb):
     else:
         if is_formula(formula_test):
             delete_excel_cell_formating(wb, lists, "E5")
-            if cell_answer(student_file, lists, "E5") == 272:
+            if str(cell_string(wb, lists, "E5")).find("E") != 0:
                 good.append("E5")
             else:
                 bad.append("E5")
@@ -427,16 +411,12 @@ def logical_functions(student_file, wb):
             continue
         else:
             if is_formula(formula):
-                if formula.find('IF') != -1:
-                    delete_excel_cell_formating(wb, lists, key)
-                    if cell_answer(student_file, lists, key) == value:
-                        good_if.append(key)
-                    else:
-                        bad_if.append(key)
-                        wrong_answer_if.append(key)
+                delete_excel_cell_formating(wb, lists, key)
+                if round(float(cell_answer(student_file, lists, key))) == round(float(value), 1):
+                    good_if.append(key)
                 else:
                     bad_if.append(key)
-                    formula_error_if.append(key)
+                    wrong_answer_if.append(key)
             else:
                 bad_if.append(key)
                 not_formula_if.append(key)
@@ -449,16 +429,12 @@ def logical_functions(student_file, wb):
             continue
         else:
             if is_formula(formula):
-                if formula.find('IF') != -1 and formula.find('AND') != -1:
-                    delete_excel_cell_formating(wb, lists, key)
-                    if round(cell_answer(student_file, lists, key)) == value:
-                        good_else.append(key)
-                    else:
-                        bad_else.append(key)
-                        wrong_answer_else.append(key)
+                delete_excel_cell_formating(wb, lists, key)
+                if round(float(cell_answer(student_file, lists, key))) == round(float(value),0):
+                    good_else.append(key)
                 else:
                     bad_else.append(key)
-                    formula_error_else.append(key)
+                    wrong_answer_else.append(key)
             else:
                 bad_else.append(key)
                 not_formula_else.append(key)
@@ -471,16 +447,12 @@ def logical_functions(student_file, wb):
             continue
         else:
             if is_formula(formula):
-                if formula.find('IF') != -1 and formula.find('AVERAGE') != -1:
-                    delete_excel_cell_formating(wb, lists, key)
-                    if cell_answer(student_file, lists, key) == value:
-                        good_else.append(key)
-                    else:
-                        bad_else.append(key)
-                        wrong_answer_else.append(key)
+                delete_excel_cell_formating(wb, lists, key)
+                if cell_answer(student_file, lists, key).strip() == value.strip():
+                    good_else.append(key)
                 else:
                     bad_else.append(key)
-                    formula_error_else.append(key)
+                    wrong_answer_else.append(key)
             else:
                 bad_else.append(key)
                 not_formula_else.append(key)
@@ -630,7 +602,6 @@ def lookup_functions(student_file, wb):
     formula2 = cell_string(wb, lists, "D35")
     if check_if_cell_empty(cell_answer(student_file, lists, "D33")) or check_if_cell_empty(
             cell_answer(student_file, lists, "D35")):
-        empty.append("D33")
         bad.append("D33")
 
         empty.append("D35")
@@ -647,17 +618,14 @@ def lookup_functions(student_file, wb):
                 else:
                     bad.append("D33")
                     bad.append("D35")
-                    wrong_answer.append("D33")
                     wrong_answer.append("D35")
             else:
                 bad.append("D33")
                 bad.append("D35")
-                formula_error.append("D33")
                 formula_error.append("D35")
         else:
             bad.append("D33")
             bad.append("D35")
-            not_formula.append("D33")
             not_formula.append("D35")
 
     for i in good:
@@ -718,7 +686,7 @@ def list_from_txt(file):
 
 
 def copy_file(file):
-    shutil.copy(file, file.replace(".xlsx", "_copy.xlsx"))
+    shutil.copy(file, file.replace(".xlsx", "_checked.xlsx"))
 
 
 def create_zip(name):
@@ -774,8 +742,8 @@ def validation_functions(wb):
                     bad.append("C" + str(j + 3))
                 bad_type.append("C3")
         if (str(validation_data[i][0]).find("E3")) != -1:
-            if str(validation_data[i][1]) == "date":
-                if str(validation_data[i][3]) == "$H$1" and str(validation_data[i][4]) == "$H$2":
+            if str(validation_data[i][1]) == "date" or str(validation_data[i][1]) == "custom" :
+                if str(validation_data[i][3]).find("H"):
                     for j in range(5):
                         good.append("E" + str(j + 3))
                 else:
@@ -845,7 +813,7 @@ def validation_functions(wb):
 
     for i in wrong_formula:
         vals = str(i[0]) + str(int(i[1:]) + 7)
-        cell_write(wb, lists, vals, "Wrong formula")
+        cell_write(wb, lists, vals, "Wrong validation type")
         cell_change_colour(wb, lists, vals, "FDDA0D")
 
 
@@ -939,7 +907,7 @@ def file_check(file):
 
     this_file = file.replace("\\", "/")
     copy_file(this_file)
-    this_file = this_file.replace(".xlsx", "_copy.xlsx")
+    this_file = this_file.replace(".xlsx", "_checked.xlsx")
     return this_file
 
 
@@ -947,7 +915,10 @@ def finish():
     print("-------------------")
     print("Files are zipped")
 
-    time.sleep(10)
+    while(True):
+        user_input = input("Press enter to close:")
+        if user_input == "":
+            break
 
 
 def end_of_testing(wb, this_file, count, file_list, name):
