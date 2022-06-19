@@ -8,17 +8,22 @@ create_zip(name)
 count = 1
 file_list = list_from_txt("uploaded-files-info.txt")
 script_start(file_list)
-for i in file_list:
-    this_file = file_check(i)
 
-    wb = load_workbook(this_file)
-    sheet_names = sheet_list_maker(wb)
+try:
+    for i in file_list:
+        this_file = file_check(i)
 
-    logical_functions(this_file, wb, sheet_names)
-    date_functions(this_file, wb, sheet_names)
-    lookup_functions(this_file, wb, sheet_names)
-    conditional_function(wb, sheet_names)
+        wb = load_workbook(this_file)
+        sheet_names = sheet_list_maker(wb)
 
-    end_of_testing(wb, this_file, count, file_list, name)
-    count = count + 1
-finish()
+        logical_functions(this_file, wb, sheet_names)
+        date_functions(this_file, wb, sheet_names)
+        lookup_functions(this_file, wb, sheet_names)
+        conditional_function(wb, sheet_names)
+
+        end_of_testing(wb, this_file, count, file_list, name)
+        count = count + 1
+    finish()
+except:
+    print(i + " file is broken")
+    input("Press enter to close:")
