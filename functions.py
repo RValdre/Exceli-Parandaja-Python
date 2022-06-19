@@ -527,7 +527,7 @@ def logical_functions(student_file, wb, sheet_names):
 
 def lookup_functions(student_file, wb, sheet_names):
     lists = sheet_names[2]
-    months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun"]
+    months = ["JAN", "FEB", "MAR", "APR", "MAY", "JUN"]
 
     good = []
     bad = []
@@ -561,12 +561,12 @@ def lookup_functions(student_file, wb, sheet_names):
                 bad.append(key)
                 not_formula.append(key)
 
-    jaanuar = dict(Week1=[1, 1, 272], Week2=[1, 2, 112], Week3=[1, 3, 282], Week4=[1, 4, 114])
-    veebruar = dict(Week1=[2, 1, 251], Week2=[2, 2, 363], Week3=[2, 3, 59], Week4=[2, 4, 421])
-    march = dict(Week1=[3, 1, 339], Week2=[3, 2, 162], Week3=[3, 3, 409], Week4=[3, 4, 438])
-    april = dict(Week1=[4, 1, 412], Week2=[4, 2, 269], Week3=[4, 3, 215], Week4=[4, 4, 391])
-    mai = dict(Week1=[5, 1, 16], Week2=[5, 2, 358], Week3=[5, 3, 342], Week4=[5, 4, 110])
-    june = dict(Week1=[6, 1, 137], Week2=[6, 2, 334], Week3=[6, 3, 429], Week4=[6, 4, 181])
+    jaanuar = dict(WEEK1=[1, 1, 272], WEEK2=[1, 2, 112], WEEK3=[1, 3, 282], WEEK4=[1, 4, 114])
+    veebruar = dict(WEEK1=[2, 1, 251], WEEK2=[2, 2, 363], WEEK3=[2, 3, 59], WEEK4=[2, 4, 421])
+    march = dict(WEEK1=[3, 1, 339], WEEK2=[3, 2, 162], WEEK3=[3, 3, 409], WEEK4=[3, 4, 438])
+    april = dict(WEEK1=[4, 1, 412], WEEK2=[4, 2, 269], WEEK3=[4, 3, 215], WEEK4=[4, 4, 391])
+    mai = dict(WEEK1=[5, 1, 16], WEEK2=[5, 2, 358], WEEK3=[5, 3, 342], WEEK4=[5, 4, 110])
+    june = dict(WEEK1=[6, 1, 137], WEEK2=[6, 2, 334], WEEK3=[6, 3, 429], WEEK4=[6, 4, 181])
 
     arr = [jaanuar, veebruar, march, april, mai, june]
     excel_cell_month_value = str(cell_string(wb, lists, "C48"))
@@ -598,10 +598,10 @@ def lookup_functions(student_file, wb, sheet_names):
                 bad.append(key)
                 not_formula.append(key)
 
-    categ = ["OVH (overheads)", "MAT (material)", "OGS (other goods/services)", "SAL (salaries)", "DEP (depreciation)"]
+    categ = ["OVH (overheads)".upper(), "MAT (material)".upper(), "OGS (other goods/services)".upper(), "SAL (salaries)".upper(), "DEP (depreciation)".upper()]
 
-    categ2 = [["ovhCategory", 1177], ["matCategory", 761], ["ogsCategory", 1385], ["salCategory", 2013],
-              ["depCategory", 1003]]
+    categ2 = [["ovhCategory".upper(), 1177], ["matCategory".upper(), 761], ["ogsCategory".upper(), 1385], ["salCategory".upper(), 2013],
+              ["depCategory".upper(), 1003]]
     value_of = str(cell_string(wb, lists, "D31"))
     cat = categ.index(value_of)
 
