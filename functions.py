@@ -6,11 +6,18 @@ import openpyxl
 from openpyxl.styles import PatternFill
 from zipfile import ZipFile
 
+def sheet_list_maker(wb):
+    sheet_list = []
+    sheets = wb.sheetnames
+    for name in sheets:
+        sheet_list.append(name)
+    return sheet_list
 
 def cell_string(wb, sheet_name, cell_name):
     sheet = wb[sheet_name]
     cell = sheet[cell_name]
-    return cell.value
+    formula = str(cell.value)
+    return formula.upper()
 
 
 def is_formula(cell_name):
@@ -45,8 +52,8 @@ def delete_excel_cell_formating(wb, sheet_name, cell_name):
     cell.style = 'Normal'
 
 
-def sum_count(student_file, wb):
-    lists = "sum, count"
+def sum_count(student_file, wb, sheet_names):
+    lists = sheet_names[1]
 
     good = []
     bad = []
@@ -133,8 +140,8 @@ def check_if_cell_empty(value):
         return False
 
 
-def text_functions(student_file, wb):
-    lists = "text functions"
+def text_functions(student_file, wb, sheet_names):
+    lists = sheet_names[2]
 
     good = []
     bad = []
@@ -245,8 +252,8 @@ def text_functions(student_file, wb):
             cell_change_colour(wb, lists, i.replace("D", "H"), "FDDA0D")
 
 
-def date_functions(student_file, wb):
-    lists = "Date functions"
+def date_functions(student_file, wb, sheet_names):
+    lists = sheet_names[0]
 
     good = []
     bad = []
@@ -381,8 +388,8 @@ def date_functions(student_file, wb):
         cell_change_colour(wb, lists, vals, "FDDA0D")
 
 
-def logical_functions(student_file, wb):
-    lists = "Logical functions"
+def logical_functions(student_file, wb, sheet_names):
+    lists = sheet_names[1]
 
     good_if = []
     good_else = []
@@ -518,8 +525,8 @@ def logical_functions(student_file, wb):
             cell_change_colour(wb, lists, i.replace("E", "G"), "FDDA0D")
 
 
-def lookup_functions(student_file, wb):
-    lists = "lookup functions"
+def lookup_functions(student_file, wb, sheet_names):
+    lists = sheet_names[2]
     months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun"]
 
     good = []
@@ -704,9 +711,9 @@ def delete_file(file):
     os.remove(file)
 
 
-def validation_functions(wb):
-    sheet = wb["Validation"]
-    lists = "Validation"
+def validation_functions(wb, sheet_names):
+    sheet = wb[sheet_names[0]]
+    lists = sheet_names[0]
 
     good = []
     bad = []
@@ -817,9 +824,9 @@ def validation_functions(wb):
         cell_change_colour(wb, lists, vals, "FDDA0D")
 
 
-def conditional_function(wb):
-    sheet = wb["Conditional formatting"]
-    lists = "Conditional formatting"
+def conditional_function(wb, sheet_names):
+    sheet = wb[sheet_names[3]]
+    lists = sheet_names[3]
     answer = []
 
     good = []
@@ -929,7 +936,8 @@ def end_of_testing(wb, this_file, count, file_list, name):
     delete_file(this_file)
 
 
-def script_start():
+def script_start(file_list):
     print("Script started")
     print("Zip archive created")
+    print("0/" + str(len(file_list)) + " have been controlled")
 
