@@ -419,7 +419,7 @@ def logical_functions(student_file, wb, sheet_names):
         else:
             if is_formula(formula):
                 delete_excel_cell_formating(wb, lists, key)
-                if round(float(cell_answer(student_file, lists, key))) == round(float(value), 1):
+                if cell_answer(student_file, lists, key) == value:
                     good_if.append(key)
                 else:
                     bad_if.append(key)

@@ -1,4 +1,4 @@
-from functions import create_zip, list_from_txt, file_check, finish, end_of_testing, logical_functions, date_functions, lookup_functions, conditional_function, script_start, sheet_list_maker
+from functions import create_zip, list_from_txt, file_check, finish, end_of_testing, logical_functions, date_functions, lookup_functions, conditional_function, script_start, sheet_list_maker, delete_file
 from openpyxl import load_workbook
 from warnings import filterwarnings
 
@@ -25,5 +25,7 @@ try:
         count = count + 1
     finish()
 except:
+    this_file = file_check(i)
+    delete_file(this_file)
     print(i + " file is broken")
     input("Press enter to close:")
